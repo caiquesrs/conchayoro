@@ -11,6 +11,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-      steps:
-        - name: step do deploy
-          run: echo Hello, world! Deploy.
+    steps:
+      - name: step do deploy
+        run: echo Hello, world! Deploy.
