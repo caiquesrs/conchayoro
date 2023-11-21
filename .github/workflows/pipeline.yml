@@ -1,34 +1,27 @@
 name: conchayoro-pipeline
-
 on:
   push:
     branches:
       - main
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
       - name: setup node
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
-
       - name: frontend install
         run: npm --prefix frontend install
-
       - name: frontend build
         run: npm --prefix frontend run build
-
       - name: upload frontend build
         uses: actions/upload-artifact@v3
         with:
           name: build
           path: frontend/.next/server/app
-
   deploy-homolog:
     runs-on: ubuntu-latest
     needs: build
@@ -41,7 +34,6 @@ jobs:
         with:
           name: build
           path: frontend/.next/server/app
-
       - name: Deploy to Homolog
         run: aws s3 cp frontend/.next/server/app s3://$BUCKET_S3 --recursive --acl public-read
         env:
@@ -50,7 +42,6 @@ jobs:
           AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
           AWS_EC2_METADATA_DISABLED: true
           BUCKET_S3: ${{ matrix.bucket }}
-
   deploy-production:
     if: contains(github.event.head_commit.message, 'podecommitar')
     runs-on: ubuntu-latest
@@ -61,7 +52,6 @@ jobs:
         with:
           name: build
           path: frontend/.next/server/app
-
       - name: Deploy to Production
         run: aws s3 cp frontend/.next/server/app s3://production-bucket --recursive --acl public-read
         env:
@@ -69,7 +59,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
           AWS_EC2_METADATA_DISABLED: true
-
   deploy-production-manual:
     runs-on: ubuntu-latest
     needs: build
@@ -78,13 +67,11 @@ jobs:
         uses: gh-actions/approval@v2
         with:
           message: "Approve deployment to production"
-      
       - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
           name: build
           path: frontend/.next/server/app
-
       - name: Deploy to Production
         run: aws s3 cp frontend/.next/server/app s3://production-bucket --recursive --acl public-read
         env:
